@@ -15,9 +15,12 @@ def get_phone(message):
     with open("phoneNumbers.txt", "r", encoding="utf-8") as f:
         ids = f.readlines()
     for x in ids:
-        print(message.text.split(" ")[1])
-        if(x.split(" ")[0] == message.text.split(" ")[1]):
-            bot.send_message(message.chat.id, "Тримай: " + x.split(" ")[1])
+        try:
+            if(x.split(" ")[0] == message.text.split(" ")[1]):
+                bot.send_message(message.chat.id, "Тримай: " + x.split(" ")[1])
+                return
+        except:
+            bot.send_message(message.chat.id, "Використовуй так: \"/get_phone_number [Прізвище]\"")
             return
     bot.send_message(message.chat.id, "Крутелика не знайдено(")
 
