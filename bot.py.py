@@ -31,11 +31,7 @@ def get_phone(message):
 
 @bot.message_handler(commands=['start'])                                    
 def start(message):
-    mess = f'Hello, {message.from_user.first_name}'
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    userid = types.KeyboardButton('Get ID')
-    get_phone = types.KeyboardButton('Phone numbers')
-    markup.add(userid, get_phone);    
+    mess = f'Hello, {message.from_user.first_name}' 
     if(message.chat.type == "group"):
         if(validation(message.chat.id, "gr")):
             with open("groupsID.txt", "a") as f:
@@ -44,7 +40,7 @@ def start(message):
         if(validation(message.chat.id, "pr")):
             with open("usersID.txt", "a") as f:
                 f.write(str(message.chat.id)+ " " + f"{message.from_user.first_name}" + "\n")
-    bot.send_message(message.chat.id, mess, reply_markup=markup)
+    bot.send_message(message.chat.id, mess)
 
 #====================================================================================
 
@@ -105,7 +101,7 @@ def validation(id, type):
             ids = f.readlines()
         if(len(ids) > 0):
             for x in ids:
-                if(x.split(" ")[0] == id):
+                if(x.split(" ")[0] == str(id)):
                     return False
 
             return True
@@ -116,9 +112,11 @@ def validation(id, type):
             ids = f.readlines()
         if(len(ids) > 0):
             for x in ids:
-                if(x.split(" ")[0] == id):                    
+                print(x, f" = {id}")
+                if(x.split(" ")[0] == str(id)):   
+                    print(False)
                     return False
-
+            print(True)
             return True
         else:
             return True
