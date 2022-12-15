@@ -1,7 +1,10 @@
 import telebot
+import time
 from telebot import types
+from threading import Thread
+from datetime import datetime
 
-
+bot = telebot.TeleBot('5780863217:AAG7-Zq0_yB5dBzgUHclz-QFPZ8-E8FCh4Q')     #Токен бота
 
 phone_book = {                                                              #Номера телефону групи
     'бабурнич': +380951321834,              
@@ -9,7 +12,67 @@ phone_book = {                                                              #Н�
     'борщун': +380953648652,                
 }
 
-bot = telebot.TeleBot('5780863217:AAG7-Zq0_yB5dBzgUHclz-QFPZ8-E8FCh4Q')     #Токен бота
+
+
+#def time_message():
+#    while True:
+#        time.sleep(1)
+#        if(datetime.now().strftime("%H") == "10" and datetime.now().strftime("%M") == "51" and datetime.now().strftime("%S") == "01"):
+#            bot.send_message(528510018, "nice")
+
+#th = Thread(target=time_message)
+#th.start()
+
+def validation(id, type):
+    ids = []
+    if(type == "gr"):
+        with open("groupsID.txt", "r") as f:
+            ids = f.readlines()
+        if(len(ids) > 0):
+            for x in ids:
+                if(x.split(" ")[0] == id):
+                    return False
+
+            return True
+        else:
+            return True
+    elif(type == "pr"):
+        with open("usersID.txt", "r") as f:
+            ids = f.readlines()
+        if(len(ids) > 0):
+            for x in ids:
+                if(x.split(" ")[0] == id):                    
+                    return False
+
+            return True
+        else:
+            return True
+
+@bot.message_handler(commands=['brgr'])
+def brodcast_group(message):
+    ids = []
+    str = ""
+    for x in range(len(message.text.split(" ")) - 1):
+        str += message.text.split(" ")[x + 1] + " "
+    with open("groupsID.txt", "r") as f:
+        ids = f.readlines()
+        if(len(ids) > 0):
+            for x in ids:
+                if(len(str) > 0):
+                    bot.send_message(x.split(" ")[0], str)
+
+@bot.message_handler(commands=['brusr'])
+def brodcast_users(message):
+    ids = []
+    str = ""
+    for x in range(len(message.text.split(" ")) - 1):
+        str += message.text.split(" ")[x + 1] + " "
+    with open("usersID.txt", "r") as f:
+        ids = f.readlines()
+        if(len(ids) > 0):
+            for x in ids:
+                if(len(str) > 0):
+                    bot.send_message(x.split(" ")[0], str)
 
 @bot.message_handler(commands=['start'])                                    #Команда /start
 def start(message):
@@ -17,7 +80,15 @@ def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     userid = types.KeyboardButton('Get ID')
     get_phone = types.KeyboardButton('Phone numbers')
-    markup.add(userid, get_phone);
+    markup.add(userid, get_phone);    
+    if(message.chat.type == "group"):
+        if(validation(message.chat.id, "gr")):
+            with open("groupsID.txt", "a") as f:
+                f.write(str(message.chat.id)+ " " + f"{message.chat.title}" + "\n")
+    elif(message.chat.type == "private"):
+        if(validation(message.chat.id, "pr")):
+            with open("usersID.txt", "a") as f:
+                f.write(str(message.chat.id)+ " " + f"{message.from_user.first_name}" + "\n")
     bot.send_message(message.chat.id, mess, reply_markup=markup)
 
 def numbers(message):                                                       #Фамілії групи 
@@ -73,5 +144,6 @@ def read_user_text(message):
             bot.send_message(message.chat.id, phone_book.get(message.text.lower()))
     except:
         pass
+
 
 bot.polling(none_stop=True, interval=0)                                     #Багатопоточність
