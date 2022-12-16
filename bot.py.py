@@ -1,3 +1,4 @@
+from typing import ValuesView
 import telebot
 import time
 from telebot import types
@@ -16,8 +17,8 @@ def get_phone(message):
         ids = f.readlines()
     for x in ids:
         try:
-            if(x.split(" ")[0] == message.text.split(" ")[1]):
-                bot.send_message(message.chat.id, "Тримай: " + x.split(" ")[1])
+            if(x.split(" ")[0] == message.text.split(" ")[1].lower()):
+                bot.send_message(message.chat.id, x.split(" ")[1])
                 return
         except:
             bot.send_message(message.chat.id, "Використовуй так: \"/get_phone_number [Прізвище]\"")
@@ -32,11 +33,15 @@ def get_phone(message):
 @bot.message_handler(commands=['start'])                                    
 def start(message):
     mess = f'Hello, {message.from_user.first_name}' 
-    if(message.chat.type == "group"):
+    print(message.chat.type)
+    if(message.chat.type == "group" or message.chat.type == "supergroup"):
         if(validation(message.chat.id, "gr")):
-            with open("groupsID.txt", "a") as f:
-                f.write(str(message.chat.id)+ " " + f"{message.chat.title}" + "\n")
-    elif(message.chat.type == "private"):
+            with open("groupsID.txt", "a", encoding="utf-8") as f:
+                f.write(str(message.chat.id)+ " " + f"{message.chat.title}" + "\n")  
+        if(validation(message.from_user.id, "pr")):
+            with open("usersID.txt", "a") as f:
+                f.write(str(message.from_user.id)+ " " + f"{message.from_user.first_name}" + "\n")                
+    if(message.chat.type == "private"):
         if(validation(message.from_user.id, "pr")):
             with open("usersID.txt", "a") as f:
                 f.write(str(message.from_user.id)+ " " + f"{message.from_user.first_name}" + "\n")
@@ -54,7 +59,7 @@ def brodcast_group(message):
         str = ""
         for x in range(len(message.text.split(" ")) - 1):
             str += message.text.split(" ")[x + 1] + " "
-        with open("groupsID.txt", "r") as f:
+        with open("groupsID.txt", "r", encoding="utf-8") as f:
             ids = f.readlines()
             if(len(ids) > 0):
                 for x in ids:
@@ -92,26 +97,29 @@ def brodcast_users(message):
 #===============================+ ДОДАТКОВІ ФУНКЦІЇ +================================ 
 
 
-        #def time_message():
-#    while True:
-#        time.sleep(1)
-#        if(datetime.now().strftime("%H") == "10" and datetime.now().strftime("%M") == "51" and datetime.now().strftime("%S") == "01"):
-#            bot.send_message(528510018, "nice")
+def spam_check():
+    while True:
+        time.sleep(1)
+        if(datetime.now().strftime("%H") == "10" and datetime.now().strftime("%M") == "51" and datetime.now().strftime("%S") == "01"):
+            bot.send_message(528510018, "nice")
 
-#th = Thread(target=time_message)
-#th.start()
+th = Thread(target=spam_check)
+th.start()
 
 
 def validation(id, type):
     ids = []
+    print("val")
     if(type == "gr"):
-        with open("groupsID.txt", "r") as f:
+        with open("groupsID.txt", "r", encoding="utf-8") as f:
             ids = f.readlines()
         if(len(ids) > 0):
             for x in ids:
+                print(x, f" = {id}")
                 if(x.split(" ")[0] == str(id)):
+                    print(False)
                     return False
-
+            print(True)
             return True
         else:
             return True
