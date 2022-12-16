@@ -37,9 +37,9 @@ def start(message):
             with open("groupsID.txt", "a") as f:
                 f.write(str(message.chat.id)+ " " + f"{message.chat.title}" + "\n")
     elif(message.chat.type == "private"):
-        if(validation(message.chat.id, "pr")):
+        if(validation(message.from_user.id, "pr")):
             with open("usersID.txt", "a") as f:
-                f.write(str(message.chat.id)+ " " + f"{message.from_user.first_name}" + "\n")
+                f.write(str(message.from_user.id)+ " " + f"{message.from_user.first_name}" + "\n")
     bot.send_message(message.chat.id, mess)
 
 #====================================================================================
@@ -49,16 +49,20 @@ def start(message):
 
 @bot.message_handler(commands=['brgr'])
 def brodcast_group(message):
-    ids = []
-    str = ""
-    for x in range(len(message.text.split(" ")) - 1):
-        str += message.text.split(" ")[x + 1] + " "
-    with open("groupsID.txt", "r") as f:
-        ids = f.readlines()
-        if(len(ids) > 0):
-            for x in ids:
-                if(len(str) > 0):
-                    bot.send_message(x.split(" ")[0], str)
+    if(acl_check(message.from_user.id)):
+        ids = []
+        str = ""
+        for x in range(len(message.text.split(" ")) - 1):
+            str += message.text.split(" ")[x + 1] + " "
+        with open("groupsID.txt", "r") as f:
+            ids = f.readlines()
+            if(len(ids) > 0):
+                for x in ids:
+                    if(len(str) > 0):
+                        bot.send_message(x.split(" ")[0], str)
+    else:
+        voice = open("net-net.ogg", "rb")
+        bot.send_voice(message.chat.id, voice)
 
 #====================================================================================
 
@@ -67,16 +71,20 @@ def brodcast_group(message):
 
 @bot.message_handler(commands=['brusr'])
 def brodcast_users(message):
-    ids = []
-    str = ""
-    for x in range(len(message.text.split(" ")) - 1):
-        str += message.text.split(" ")[x + 1] + " "
-    with open("usersID.txt", "r") as f:
-        ids = f.readlines()
-        if(len(ids) > 0):
-            for x in ids:
-                if(len(str) > 0):
-                    bot.send_message(x.split(" ")[0], str)
+    if(acl_check(message.from_user.id)):
+        ids = []
+        str = ""
+        for x in range(len(message.text.split(" ")) - 1):
+            str += message.text.split(" ")[x + 1] + " "
+        with open("usersID.txt", "r") as f:
+            ids = f.readlines()
+            if(len(ids) > 0):
+                for x in ids:
+                    if(len(str) > 0):
+                        bot.send_message(x.split(" ")[0], str)
+    else:
+        voice = open("net-net.ogg", "rb")
+        bot.send_voice(message.chat.id, voice)
 
 #====================================================================================
 
@@ -120,6 +128,17 @@ def validation(id, type):
             return True
         else:
             return True
+
+
+def acl_check(id):
+    ids = []
+    with open("adminsID.txt", "r") as f:
+            ids = f.readlines()
+    if(len(ids) > 0):
+            for x in ids:
+                if(x.split(" ")[0] == str(id)):
+                    return True
+            return False
 
 #====================================================================================
 
